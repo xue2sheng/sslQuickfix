@@ -13,7 +13,7 @@ Take into account that openssl, boost and xml2 thirdparty libraries could be nee
       ./bootstrap
       ./configure --with-openssl --enable-static --prefix=/opt/quickfix --exec-prefix=/opt/quickfix
       make
-      make check // FieldMapTestCase may fail
+      make check # FieldMapTestCase may fail
       sudo make install
 
 Library dependencies should looks like:
