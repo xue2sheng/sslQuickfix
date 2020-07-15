@@ -1,6 +1,6 @@
 ## Check quickfix library
 
-A [simplest project](simplest/README.md), inspired from [Mike Gatny's quickfix 101](https://github.com/mgatny/quickfix_101), should test that our previous quickfix installation.
+A simplest project, inspired from [Mike Gatny's quickfix 101](https://github.com/mgatny/quickfix_101), should test that our previous quickfix installation.
 
 More effort on the C++ "client" than on the Go "server". In fact, the reason to choose Go as language for the server mocks was to save time and simplify deployment on testing environments.
 
