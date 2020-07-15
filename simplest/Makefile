@@ -5,8 +5,8 @@ all: tradeclient executorgo
 tradeclient: src/C++/config.h src/C++/getopt-repl.h src/C++/Application.h src/C++/Application.cpp src/C++/tradeclient.cpp src/C++/XMLSettings.h
 	g++ -o tradeclient src/C++/XMLSettings.cpp src/C++/Application.cpp src/C++/tradeclient.cpp -Isrc -I/opt/quickfix/include -L/opt/quickfix/lib -lquickfix -lssl -lcrypto -lpthread -Wno-deprecated
 
-executorgo: src/executorgo/main.go 
-	go build -v -o ./executorgo ./src/executorgo/main.go
+executorgo: src/executor/main.go 
+	go build -v -o ./executorgo ./src/executor/main.go
 
 clean:
 	rm -f tradeclient
