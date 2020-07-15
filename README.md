@@ -6,14 +6,14 @@ There are several options to check out:
 
 ![summary](images/summary.plantuml.png)
 
-    Due to some vanilla configuration files, i.e. acceptor ports, a simple XML configuration was implemented. Try to prevent your code from using modern C++ features; typical quickfix business based binaries are meant for classic Linux servers.
+Due to some vanilla configuration files, i.e. acceptor ports, a simple XML configuration was implemented. Try to prevent your code from using modern C++ features; typical quickfix business based binaries are meant for classic Linux servers.
 
 ## Install quickfix library
 
-    Double check that your version is up-to-date enough to support SSL internally and [install it on your system](quickfix/README.md).
+Double check that your version is up-to-date enough to support SSL internally and [install it on your system](quickfix/README.md).
 
 ## Check quickfix library
 
-    A [simplest project](simplest/README.md), inspired from [Mike Gatny's quickfix 101](https://github.com/mgatny/quickfix_101), should test that our previous quickfix installation.
+A [simplest project](simplest/README.md), inspired from [Mike Gatny's quickfix 101](https://github.com/mgatny/quickfix_101), should test that our previous quickfix installation.
 
-    More effort on the C++ "client" than on the Go "server". In fact, the reason to choose Go as language for the server mocks was to save time and simplify deployment on testing environments.
+More effort on the C++ "client" than on the Go "server". In fact, the reason to choose Go as language for the server mocks was to save time and simplify deployment on testing environments.
