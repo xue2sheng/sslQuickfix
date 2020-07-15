@@ -1,0 +1,17 @@
+@startwbs
++ SSL Quickfix \nProof of Concept
+++_ Support from the library itself
+++- SSL \nSingle Threaded \nclass
++++ SSL \nMultithreaded \nclass
++++- Initiator \nclass
+++++ Acceptor \nclass
+++++ Both \nat the same time
++++-_ duplicated objects\ndealing with ports
+++_ Support outside of the library
++++ Vanilla non-SSL \nclass
++++-_ external stunnel \ncomplex configuration
++++- Initiator \nclass
+++++ Acceptor \nclass
+++++ Both \nat the same time
++++-_ duplicated objects\ndealing with ports
+@endwbs
