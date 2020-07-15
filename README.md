@@ -12,7 +12,10 @@ Due to some vanilla configuration files, i.e. acceptor ports, a simple XML confi
 
 Double check that your version is up-to-date enough to support SSL internally and [install it on your system](quickfix/README.md).
 
-## Check quickfix library
+## Simplest check quickfix library
 
 A [simplest project](simplest/README.md), inspired from [Mike Gatny's quickfix 101](https://github.com/mgatny/quickfix_101), should test that our previous quickfix installation. Basically extended vanilla examples on their very original SSL certificates.
 
+## Check certificates
+
+Reusing previous code, this subtask aims at [checking our own certificates](checkcert/README.md) and at running a simple connection with them.
