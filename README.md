@@ -18,4 +18,4 @@ A [simplest project](simplest/README.md), inspired from [Mike Gatny's quickfix 1
 
 ## Check certificates
 
-Reusing previous code, this subtask aims at [checking our own certificates](checkcert/README.md) and at running a simple connection with them.
+Reusing previous code, this subtask aims at [checking our own certificates](checkcert/README.md) and at running a simple connection with them. Take into account this subsection is very dependent upon your concrete operating system.
