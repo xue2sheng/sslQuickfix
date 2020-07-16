@@ -23,3 +23,12 @@ retuns the following result on my development environment:
 
 	ECDHE-RSA-AES256-GCM-SHA384 TLSv1.2 Kx=ECDH     Au=RSA  Enc=AESGCM(256) Mac=AEAD
 
+## Generate your own certificates
+
+Have a look to [quickfix certificates](https://github.com/quickfix/quickfix/tree/master/bin/cfg/certs) and adapt them to your needs:
+
+	openssl req -x509 -newkey rsa:4096 -sha256 -days 730 -nodes -keyout cakey.pem -out cacert.pem -subj '/CN=xue2sheng.com' -extensions san -config <(echo '[req]'; echo 'distinguished_name=req'; echo '[san]'; echo 'subjectAltName=DNS:*.xue2sheng.com,DNS:localhost')
+
+Double check that subject alternatives names are the ones you're expected to use: 
+
+	openssl x509 -text -in cacert.pem -noout
