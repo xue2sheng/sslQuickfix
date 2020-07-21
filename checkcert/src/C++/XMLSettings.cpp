@@ -142,6 +142,7 @@ XMLSettings::XMLSettings(const std::string& filename)
                     boost::optional<std::string> SenderCompID = item.second.get_optional<std::string>("<xmlattr>.SenderCompID");
                     boost::optional<std::string> TargetCompID = item.second.get_optional<std::string>("<xmlattr>.TargetCompID");
 
+                    sessionCategory->set(session); // that's wrong but supposedly needed
                     if (BeginString && SenderCompID && TargetCompID) {
                         session.setString(FIX::BEGINSTRING, *BeginString);
                         session.setString(FIX::SENDERCOMPID, *SenderCompID);

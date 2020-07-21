@@ -143,6 +143,7 @@ private:
     FIX::StopPx queryStopPx();
     FIX::TimeInForce queryTimeInForce();
 
+    void log(std::ostream& out, const FIX::Message& message);
     FIX42::NewOrderSingle launchDefaultNewOrderSingle42();
 };
 

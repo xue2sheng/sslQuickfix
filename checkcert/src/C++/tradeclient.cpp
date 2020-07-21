@@ -40,6 +40,8 @@
 #include <string>
 #include <vector>
 
+void logSettings(const FIX::SessionSettings& info, const std::string& label);
+
 int main(int argc, char** argv)
 {
     if (argc < 2) {
@@ -70,12 +72,13 @@ int main(int argc, char** argv)
     try {
 
         XMLSettings xmlSettings(file);
-        std::cout << "initiator -> " << xmlSettings.Initiator.getSessions().size() << std::endl;
-        std::cout << "SSL initiator -> " << xmlSettings.SSLInitiator.getSessions().size() << std::endl;
-        std::cout << "acceptor -> " << xmlSettings.Acceptor.getSessions().size() << std::endl;
-        std::cout << "SSL acceptor -> " << xmlSettings.SSLAcceptor.getSessions().size() << std::endl;
 
-        //FIX::SessionSettings settings(file);
+        std::cout << "SETTINGS:" << std::endl
+                  << std::endl;
+        logSettings(xmlSettings.Initiator, "Initiator");
+        logSettings(xmlSettings.SSLInitiator, "SSL Initiator");
+        logSettings(xmlSettings.Acceptor, "Acceptor");
+        logSettings(xmlSettings.SSLAcceptor, "SSL Acceptor");
 
         Application application;
         FIX::FileStoreFactory storeFactory(xmlSettings.SSLInitiator);
@@ -113,4 +116,21 @@ int main(int argc, char** argv)
         delete initiator;
         return 1;
     }
+}
+
+void logSettings(const FIX::SessionSettings& info, const std::string& label)
+{
+    std::cout << label << " -> " << info.size() << std::endl;
+    if (info.size() > 0) {
+        std::cout << info;
+        if (info.get().has(FIX::CLIENT_CERT_FILE))
+            std::cout << label << " got CLIENT_CERT_FILE" << std::endl;
+        else
+            std::cout << label << " got no CLIENT_CERT_FILE" << std::endl;
+        if (info.get().has(FIX::CLIENT_CERT_KEY_FILE))
+            std::cout << label << " got CLIENT_CERT_KEY_FILE" << std::endl;
+        else
+            std::cout << label << " got no CLIENT_CERT_KEY_FILE" << std::endl;
+    }
+    std::cout << std::endl;
 }

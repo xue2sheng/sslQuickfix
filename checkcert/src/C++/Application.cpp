@@ -27,7 +27,9 @@
 
 #include "Application.h"
 #include "quickfix/Session.h"
+#include <cctype>
 #include <iostream>
+#include <sstream>
 
 void Application::onLogon(const FIX::SessionID& sessionID)
 {
@@ -45,8 +47,10 @@ void Application::fromApp(const FIX::Message& message, const FIX::SessionID& ses
     EXCEPT(FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType)
 {
     crack(message, sessionID);
+
     std::cout << std::endl
-              << "IN: " << message << std::endl;
+              << "IN:" << std::endl;
+    log(std::cout, message);
 }
 
 void Application::toApp(FIX::Message& message, const FIX::SessionID& sessionID)
@@ -61,7 +65,8 @@ void Application::toApp(FIX::Message& message, const FIX::SessionID& sessionID)
     }
 
     std::cout << std::endl
-              << "OUT: " << message << std::endl;
+              << "OUT:" << std::endl;
+    log(std::cout, message);
 }
 
 void Application::onMessage(const FIX40::ExecutionReport&, const FIX::SessionID&) { }
@@ -848,4 +853,14 @@ FIX42::NewOrderSingle Application::launchDefaultNewOrderSingle42()
     newOrderSingle.getHeader().setField(FIX::TargetCompID("ACCEPT"));
 
     return newOrderSingle;
+}
+
+void Application::log(std::ostream& out, const FIX::Message& message)
+{
+    std::stringstream ss;
+    ss << message;
+    char c;
+    while (ss.get(c))
+        out << (isprint(c) ? c : '\n');
+    out << std::endl;
 }
