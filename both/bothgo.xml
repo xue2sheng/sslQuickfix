@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<settings>
+    <default HeartBtInt="60" ResetOnLogon="Y" FileLogPath="logs" FileStorePath="logs" StartTime="00:00:00" EndTime="00:00:00" SocketPrivateKeyFile="tls/cakey.pem" SocketCertificateFile="tls/cacert.pem" />
+    <fixsessions>
+        <fixsession TLS="true" ConnectionType="acceptor" SocketConnectPort="9880" SenderCompID="BOTH_acceptor" TargetCompID="BOTH_acceptor" BeginString="FIX.4.2" SocketInitiatorPort="9880" />
+        <fixsession TLS="true" ConnectionType="initiator" SocketConnectPort="9881" SenderCompID="BOTH_initiator" TargetCompID="BOTH_initiator" BeginString="FIX.4.2" SocketInitiatorPort="9881" />
+    </fixsessions>
+</settings>
+

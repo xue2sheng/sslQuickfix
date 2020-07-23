@@ -36,3 +36,5 @@ simplest/tradeclient
 simplest/executorgo
 checkcert/tradeclient
 checkcert/executorgo
+both/bothcpp
+both/bothgo
