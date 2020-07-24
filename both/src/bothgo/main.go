@@ -3,7 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"os/signal"
 	"path"
+	"strconv"
+	"sync"
 
 	"github.com/quickfixgo/enum"
 	"github.com/quickfixgo/field"
@@ -24,10 +28,6 @@ import (
 	fix43er "github.com/quickfixgo/fix43/executionreport"
 	fix44er "github.com/quickfixgo/fix44/executionreport"
 	fix50er "github.com/quickfixgo/fix50/executionreport"
-
-	"os"
-	"os/signal"
-	"strconv"
 )
 
 type executor struct {
@@ -447,7 +447,7 @@ func (e *executor) OnFIX50NewOrderSingle(msg fix50nos.NewOrderSingle, sessionID 
 func main() {
 	flag.Parse()
 
-	cfgFileName := path.Join("./", "both.cfg")
+	cfgFileName := path.Join("./", "bothgo.xml")
 	if flag.NArg() > 0 {
 		cfgFileName = flag.Arg(0)
 	}
@@ -458,18 +458,39 @@ func main() {
 		return
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(4)
+
+	go launchAcceptor("SSL Acceptor", &settings.SSLAcceptor, &wg)
+	go launchInitiator("SSL Initiator", &settings.SSLInitiator, &wg)
+	go launchAcceptor("Acceptor", &settings.Acceptor, &wg)
+	go launchInitiator("Initiator", &settings.Initiator, &wg)
+
+	wg.Wait()
+}
+
+func launchAcceptor(message string, configInfo *quickfix.Settings, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	count := len(configInfo.SessionSettings())
+	if count == 0 {
+		fmt.Printf("Nothing to work with %s\n", message)
+		return
+	}
+	fmt.Printf("%s got %v sessions\n", message, count)
+
 	logFactory := quickfix.NewScreenLogFactory()
 	app := newExecutor()
 
-	acceptor, err := quickfix.NewAcceptor(app, quickfix.NewMemoryStoreFactory(), &settings.SSLAcceptor, logFactory)
+	acceptor, err := quickfix.NewAcceptor(app, quickfix.NewMemoryStoreFactory(), configInfo, logFactory)
 	if err != nil {
-		fmt.Printf("Unable to create Acceptor: %s\n", err)
+		fmt.Printf("Unable to create %s: %s\n", message, err)
 		return
 	}
 
 	err = acceptor.Start()
 	if err != nil {
-		fmt.Printf("Unable to start Acceptor: %s\n", err)
+		fmt.Printf("Unable to start %s: %s\n", message, err)
 		return
 	}
 
@@ -478,4 +499,36 @@ func main() {
 	<-interrupt
 
 	acceptor.Stop()
+}
+
+func launchInitiator(message string, configInfo *quickfix.Settings, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	count := len(configInfo.SessionSettings())
+	if count == 0 {
+		fmt.Printf("Nothing to work with %s\n", message)
+		return
+	}
+	fmt.Printf("%s got %v sessions\n", message, count)
+
+	logFactory := quickfix.NewScreenLogFactory()
+	app := newExecutor()
+
+	initiator, err := quickfix.NewInitiator(app, quickfix.NewMemoryStoreFactory(), configInfo, logFactory)
+	if err != nil {
+		fmt.Printf("Unable to create %s: %s\n", message, err)
+		return
+	}
+
+	err = initiator.Start()
+	if err != nil {
+		fmt.Printf("Unable to start %s: %s\n", message, err)
+		return
+	}
+
+	interrupt := make(chan os.Signal)
+	signal.Notify(interrupt, os.Interrupt, os.Kill)
+	<-interrupt
+
+	initiator.Stop()
 }

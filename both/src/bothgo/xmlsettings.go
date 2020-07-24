@@ -4,7 +4,6 @@ package main
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -41,8 +40,7 @@ func (xmlsettings *XMLSettings) LoadConfiguration(configFile string) error {
 
 	xml.Unmarshal(byteValue, &xmlsettings.Info)
 
-	for index, fixsession := range xmlsettings.Info.FixSessionInfo.FixSessions {
-		fmt.Printf("FixSession %v TLS=%v connectionType=%v\n", index, fixsession.TLS, fixsession.ConnectionType)
+	for _, fixsession := range xmlsettings.Info.FixSessionInfo.FixSessions {
 		if fixsession.TLS == "true" {
 			if fixsession.ConnectionType == "initiator" {
 				xmlsettings.sslinitiator(&fixsession)
@@ -58,7 +56,7 @@ func (xmlsettings *XMLSettings) LoadConfiguration(configFile string) error {
 		}
 	}
 
-	return errors.New("Did nothing")
+	return nil
 }
 
 func (xmlsettings *XMLSettings) Init() {
@@ -71,21 +69,63 @@ func (xmlsettings *XMLSettings) Init() {
 func (xmlsettings *XMLSettings) initiator(fixsession *FixSession) {
 	xmlsettings.Info.DefaultInfo.update(&xmlsettings.Initiator)
 	fixsession.update(&xmlsettings.Initiator)
+	var fs quickfix.SessionSettings
+	if len(fixsession.SocketConnectHost) > 0 {
+		fs.Set(config.SocketConnectHost, fixsession.SocketConnectHost)
+	}
+	if len(fixsession.SocketConnectPort) > 0 {
+		fs.Set(config.SocketConnectPort, fixsession.SocketConnectPort)
+	}
+	xmlsettings.Initiator.AddSession(&fs)
 }
 
 func (xmlsettings *XMLSettings) sslinitiator(fixsession *FixSession) {
 	xmlsettings.Info.DefaultInfo.update(&xmlsettings.SSLInitiator)
 	fixsession.update(&xmlsettings.SSLInitiator)
+	var fs quickfix.SessionSettings
+	if len(fixsession.SocketConnectHost) > 0 {
+		fs.Set(config.SocketConnectHost, fixsession.SocketConnectHost)
+	}
+	if len(fixsession.SocketConnectPort) > 0 {
+		fs.Set(config.SocketConnectPort, fixsession.SocketConnectPort)
+	}
+	if len(fixsession.SocketUseSSL) > 0 {
+		fs.Set(config.SocketUseSSL, fixsession.SocketUseSSL)
+	}
+	xmlsettings.SSLInitiator.AddSession(&fs)
 }
 
 func (xmlsettings *XMLSettings) acceptor(fixsession *FixSession) {
 	xmlsettings.Info.DefaultInfo.update(&xmlsettings.Acceptor)
 	fixsession.update(&xmlsettings.Acceptor)
+	var fs quickfix.SessionSettings
+	// specific session seems not to work
+	if len(fixsession.SocketAcceptPort) > 0 {
+		fs.Set(config.SocketAcceptPort, fixsession.SocketAcceptPort)
+	}
+	// it seems to need to be defined at a global level. No good at all
+	if len(fixsession.SocketAcceptPort) > 0 {
+		xmlsettings.Acceptor.GlobalSettings().Set(config.SocketAcceptPort, fixsession.SocketAcceptPort)
+	}
+	xmlsettings.Acceptor.AddSession(&fs)
 }
 
 func (xmlsettings *XMLSettings) sslacceptor(fixsession *FixSession) {
 	xmlsettings.Info.DefaultInfo.update(&xmlsettings.SSLAcceptor)
 	fixsession.update(&xmlsettings.SSLAcceptor)
+	var fs quickfix.SessionSettings
+	// specific session seems not to work
+	if len(fixsession.SocketAcceptPort) > 0 {
+		fs.Set(config.SocketAcceptPort, fixsession.SocketAcceptPort)
+	}
+	// it seems to need to be defined at a global level. No good at all
+	if len(fixsession.SocketAcceptPort) > 0 {
+		xmlsettings.SSLAcceptor.GlobalSettings().Set(config.SocketAcceptPort, fixsession.SocketAcceptPort)
+	}
+	if len(fixsession.SocketUseSSL) > 0 {
+		fs.Set(config.SocketUseSSL, fixsession.SocketUseSSL)
+	}
+	xmlsettings.SSLAcceptor.AddSession(&fs)
 }
 
 type Settings struct {
@@ -95,32 +135,18 @@ type Settings struct {
 }
 
 type Default struct {
-	XMLName                           xml.Name `xml:"default"`
-	SocketConnectHost                 string   `xml:"SocketConnectHost,attr"`
-	HeartBtInt                        string   `xml:"HeartBtInt,attr"`
-	ResetOnLogon                      string   `xml:"ResetOnLogon,attr"`
-	FileLogPath                       string   `xml:"FileLogPath,attr"`
-	FileStorePath                     string   `xml:"FileStorePath,attr"`
-	StartTime                         string   `xml:"StartTime,attr"`
-	EndTime                           string   `xml:"EndTime,attr"`
-	DataDictionary                    string   `xml:"DataDictionary,attr"`
-	SocketPrivateKeyFile              string   `xml:"SocketPrivateKeyFile,attr"`
-	SocketCertificateFile             string   `xml:"SocketCertificateFile,attr"`
-	SSLProtocol                       string   `xml:"SSLProtocol,attr"`
-	SSLCipherSuite                    string   `xml:"SSLCipherSuite,attr"`
-	CertificationAuthoritiesFile      string   `xml:"CertificationAuthoritiesFile,attr"`
-	CertificationAuthoritiesDirectory string   `xml:"CertificationAuthoritiesDirectory,attr"`
+	XMLName        xml.Name `xml:"default"`
+	HeartBtInt     string   `xml:"HeartBtInt,attr"`
+	FileLogPath    string   `xml:"FileLogPath,attr"`
+	FileStorePath  string   `xml:"FileStorePath,attr"`
+	StartTime      string   `xml:"StartTime,attr"`
+	EndTime        string   `xml:"EndTime,attr"`
+	DataDictionary string   `xml:"DataDictionary,attr"`
 }
 
 func (def *Default) update(qf *quickfix.Settings) {
-	if len(def.SocketConnectHost) > 0 {
-		qf.GlobalSettings().Set(config.SocketConnectHost, def.SocketConnectHost)
-	}
 	if len(def.HeartBtInt) > 0 {
 		qf.GlobalSettings().Set(config.HeartBtInt, def.HeartBtInt)
-	}
-	if len(def.ResetOnLogon) > 0 {
-		qf.GlobalSettings().Set(config.ResetOnLogon, def.ResetOnLogon)
 	}
 	if len(def.FileLogPath) > 0 {
 		qf.GlobalSettings().Set(config.FileLogPath, def.FileLogPath)
@@ -137,12 +163,6 @@ func (def *Default) update(qf *quickfix.Settings) {
 	if len(def.DataDictionary) > 0 {
 		qf.GlobalSettings().Set(config.DataDictionary, def.DataDictionary)
 	}
-	if len(def.SocketPrivateKeyFile) > 0 {
-		qf.GlobalSettings().Set(config.SocketPrivateKeyFile, def.SocketPrivateKeyFile)
-	}
-	if len(def.SocketCertificateFile) > 0 {
-		qf.GlobalSettings().Set(config.SocketCertificateFile, def.SocketCertificateFile)
-	}
 }
 
 type FixSessions struct {
@@ -151,28 +171,30 @@ type FixSessions struct {
 }
 
 type FixSession struct {
-	XMLName                            xml.Name `xml:"fixsession"`
-	TLS                                string   `xml:"TLS,attr"`
-	ConnectionType                     string   `xml:"ConnectionType,attr"`
-	SocketConnectHost                  string   `xml:"SocketConnectHost,attr"`
-	SocketConnectPort                  string   `xml:"SocketConnectPort,attr"`
-	SenderCompID                       string   `xml:"SenderCompID,attr"`
-	TargetCompID                       string   `xml:"TargetCompID,attr"`
-	BeginString                        string   `xml:"BeginString,attr"`
-	SocketInitiatorPort                string   `xml:"SocketInitiatorPort,attr"`
-	SocketAcceptorPort                 string   `xml:"SocketAcceptorPort,attr"`
-	ClientCertificateKeyFile           string   `xml:"ClientCertificateKeyFile,attr"`
-	ClientCertificateFile              string   `xml:"ClientCertificateFile,attr"`
-	ServerCertificateFile              string   `xml:"ServerCertificateFile,attr"`
-	ServerCertificateKeyFile           string   `xml:"ServerCertificateKeyFile,attr"`
-	CertificateVerifyLevel             string   `xml:"CertificateVerifyLevel,attr"`
-	CertificateRevocationListFile      string   `xml:"CertificateRevocationListFile,attr"`
-	CertificateRevocationListDirectory string   `xml:"CertificateRevocationListDirectory,attr"`
+	XMLName                  xml.Name `xml:"fixsession"`
+	TLS                      string   `xml:"TLS,attr"`
+	ConnectionType           string   `xml:"ConnectionType,attr"`
+	ResetOnLogon             string   `xml:"ResetOnLogon,attr"`
+	SocketConnectHost        string   `xml:"SocketConnectHost,attr"`
+	SocketConnectPort        string   `xml:"SocketConnectPort,attr"`
+	SenderCompID             string   `xml:"SenderCompID,attr"`
+	TargetCompID             string   `xml:"TargetCompID,attr"`
+	BeginString              string   `xml:"BeginString,attr"`
+	SocketInitiatorPort      string   `xml:"SocketInitiatorPort,attr"`
+	SocketAcceptPort         string   `xml:"SocketAcceptPort,attr"`
+	ServerCertificateFile    string   `xml:"ServerCertificateFile,attr"`
+	ServerCertificateKeyFile string   `xml:"ServerCertificateKeyFile,attr"`
+	SocketPrivateKeyFile     string   `xml:"SocketPrivateKeyFile,attr"`
+	SocketCertificateFile    string   `xml:"SocketCertificateFile,attr"`
+	SocketCAFile             string   `xml:"SocketCAFile"`
+	SocketInsecureSkipVerify string   `xml:"SocketInsecureSkipVerify"`
+	SocketServerName         string   `xml:"SocketServerName"`
+	SocketMinimumTLSVersion  string   `xml:"SocketMinimumTLSVersion"`
+	SocketUseSSL             string   `xml:"SocketUseSSL"`
 }
 
 func (fs *FixSession) update(qf *quickfix.Settings) {
 	if len(fs.SocketConnectPort) > 0 {
-		qf.GlobalSettings().Set(config.SocketConnectPort, fs.SocketConnectPort)
 	}
 	if len(fs.SenderCompID) > 0 {
 		qf.GlobalSettings().Set(config.SenderCompID, fs.SenderCompID)
@@ -182,5 +204,8 @@ func (fs *FixSession) update(qf *quickfix.Settings) {
 	}
 	if len(fs.BeginString) > 0 {
 		qf.GlobalSettings().Set(config.BeginString, fs.BeginString)
+	}
+	if len(fs.ResetOnLogon) > 0 {
+		qf.GlobalSettings().Set(config.ResetOnLogon, fs.ResetOnLogon)
 	}
 }
