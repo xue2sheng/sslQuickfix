@@ -137,6 +137,8 @@ XMLSettings::XMLSettings(const std::string& filename)
                         session.setString(FIX::SOCKET_CONNECT_HOST, *node);
                     if (node = item.second.get_optional<std::string>("<xmlattr>.SocketConnectPort"))
                         session.setString(FIX::SOCKET_CONNECT_PORT, *node);
+                    if (node = item.second.get_optional<std::string>("<xmlattr>.SocketAcceptPort"))
+                        session.setString(FIX::SOCKET_ACCEPT_PORT, *node);
 
                     boost::optional<std::string> BeginString = item.second.get_optional<std::string>("<xmlattr>.BeginString");
                     boost::optional<std::string> SenderCompID = item.second.get_optional<std::string>("<xmlattr>.SenderCompID");

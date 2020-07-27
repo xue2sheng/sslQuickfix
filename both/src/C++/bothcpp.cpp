@@ -24,9 +24,12 @@
 #endif
 
 #include "quickfix/FileStore.h"
+#include "quickfix/SocketAcceptor.h"
 #include "quickfix/SocketInitiator.h"
 #ifdef HAVE_SSL
+#include "quickfix/SSLSocketAcceptor.h"
 #include "quickfix/SSLSocketInitiator.h"
+#include "quickfix/ThreadedSSLSocketAcceptor.h"
 #include "quickfix/ThreadedSSLSocketInitiator.h"
 #endif
 #include "Application.h"
@@ -41,34 +44,21 @@
 #include <vector>
 
 void logSettings(const FIX::SessionSettings& info, const std::string& label);
+void launchInitiator(const FIX::SessionSettings& info, const std::string& label);
+void launchAcceptor(const FIX::SessionSettings& info, const std::string& label);
 
 int main(int argc, char** argv)
 {
     if (argc < 2) {
         std::cout << "usage: " << argv[0]
-                  << " configuration_file [default|interactive] {SSL|SSL-ST|NO_SSL}" << std::endl
-                  << std::endl
-                  << "If only the required configuration file is provided, an SSL 4.2 FIX, LIMIT, IOC, EUR/USD, INIT->ACCEPT will by sent by default" << std::endl
+                  << " configuration_file" << std::endl
                   << std::endl;
         return 0;
     }
     std::string file = argv[1];
 
-    bool launchDefaultOrder = true;
-    if (argc > 2) {
-        std::string defaultOrder;
-        defaultOrder.assign(argv[2]);
-        launchDefaultOrder = (defaultOrder.compare("default") == 0);
-    }
-
-#ifdef HAVE_SSL
-    std::string isSSL = "SSL"; // multithreaded by default
-    if (argc > 3) {
-        isSSL.assign(argv[3]);
-    }
-#endif
-
     FIX::Initiator* initiator = 0;
+    FIX::Acceptor* acceptor = 0;
     try {
 
         XMLSettings xmlSettings(file);
@@ -76,15 +66,14 @@ int main(int argc, char** argv)
         std::cout << "SETTINGS:" << std::endl
                   << std::endl;
         logSettings(xmlSettings.Initiator, "Initiator");
-        logSettings(xmlSettings.SSLInitiator, "SSL Initiator");
         logSettings(xmlSettings.Acceptor, "Acceptor");
-        logSettings(xmlSettings.SSLAcceptor, "SSL Acceptor");
 
         Application application;
-        //        FIX::FileStoreFactory storeFactory(xmlSettings.SSLInitiator);
-        FIX::FileStoreFactory storeFactory(xmlSettings.Initiator);
-        //       FIX::ScreenLogFactory logFactory(xmlSettings.SSLInitiator);
-        FIX::ScreenLogFactory logFactory(xmlSettings.Initiator);
+        FIX::FileStoreFactory storeFactoryInitiator(xmlSettings.Initiator);
+        FIX::FileStoreFactory storeFactoryAcceptor(xmlSettings.Acceptor);
+        FIX::ScreenLogFactory logFactoryInitiator(xmlSettings.Initiator);
+        FIX::ScreenLogFactory logFactoryAcceptor(xmlSettings.Acceptor);
+
         /*
 #ifdef HAVE_SSL
         if (isSSL.compare("SSL") == 0) {
@@ -92,11 +81,6 @@ int main(int argc, char** argv)
                       << "Multithreaded SSL" << std::endl
                       << std::endl;
             initiator = new FIX::ThreadedSSLSocketInitiator(application, storeFactory, xmlSettings.SSLInitiator, logFactory);
-        } else if (isSSL.compare("SSL-ST") == 0) {
-            std::cout << std::endl
-                      << "singlethreaded SSL" << std::endl
-                      << std::endl;
-            initiator = new FIX::SSLSocketInitiator(application, storeFactory, xmlSettings.SSLInitiator, logFactory);
         } else
 #endif
 */
@@ -105,20 +89,29 @@ int main(int argc, char** argv)
                       << "No SSL" << std::endl
                       << std::endl;
             //initiator = new FIX::SocketInitiator(application, storeFactory, xmlSettings.SSLInitiator, logFactory);
-            initiator = new FIX::SocketInitiator(application, storeFactory, xmlSettings.Initiator, logFactory);
+            initiator = new FIX::SocketInitiator(application, storeFactoryInitiator, xmlSettings.Initiator, logFactoryInitiator);
+            acceptor = new FIX::SocketAcceptor(application, storeFactoryAcceptor, xmlSettings.Acceptor, logFactoryAcceptor);
         }
 
         initiator->start();
+        acceptor->start();
 
         FIX::process_sleep(3);
         if (xmlSettings.Initiator.size() > 0) {
             std::set<FIX::SessionID>::iterator firstOne = xmlSettings.Initiator.getSessions().begin();
-            application.run(launchDefaultOrder, firstOne->getSenderCompID(), firstOne->getTargetCompID());
+            application.run(firstOne->getSenderCompID(), firstOne->getTargetCompID());
+        }
+        FIX::process_sleep(3);
+        if (xmlSettings.Acceptor.size() > 0) {
+            std::set<FIX::SessionID>::iterator firstOne = xmlSettings.Acceptor.getSessions().begin();
+            application.run(firstOne->getSenderCompID(), firstOne->getTargetCompID());
         }
         FIX::process_sleep(3);
 
         initiator->stop();
         delete initiator;
+        acceptor->stop();
+        delete acceptor;
 
         return 0;
 
@@ -144,4 +137,13 @@ void logSettings(const FIX::SessionSettings& info, const std::string& label)
             std::cout << label << " got no CLIENT_CERT_KEY_FILE" << std::endl;
     }
     std::cout << std::endl;
+}
+
+void launchInitiator(const FIX::SessionSettings& info, const std::string& label)
+{
+}
+
+void launchAcceptor(const FIX::SessionSettings& info, const std::string& label)
+{
+    return;
 }
