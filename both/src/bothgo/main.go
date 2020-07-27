@@ -477,7 +477,7 @@ func launchAcceptor(message string, configInfo *quickfix.Settings, wg *sync.Wait
 		fmt.Printf("Nothing to work with %s\n", message)
 		return
 	}
-	fmt.Printf("%s got %v sessions\n", message, count)
+	fmt.Printf("%s got %v sessions\n\n", message, count)
 
 	logFactory := quickfix.NewScreenLogFactory()
 	app := newExecutor()
@@ -509,7 +509,7 @@ func launchInitiator(message string, configInfo *quickfix.Settings, wg *sync.Wai
 		fmt.Printf("Nothing to work with %s\n", message)
 		return
 	}
-	fmt.Printf("%s got %v sessions\n", message, count)
+	fmt.Printf("%s got %v sessions\n\n", message, count)
 
 	logFactory := quickfix.NewScreenLogFactory()
 	app := newExecutor()

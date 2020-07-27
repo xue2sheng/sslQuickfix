@@ -21,3 +21,6 @@ A [simplest project](simplest/README.md), inspired from [Mike Gatny's quickfix 1
 Reusing previous code, this subtask aims at [checking our own certificates](checkcert/README.md) and at running a simple connection with them. Take into account this subsection is very dependent upon your concrete operating system.
 
 Some strange issue detected about settings objects; it looks like only 'default' certification configurations make it to SSL utility classes. 
+
+## Both roles: acceptor and initiator in the same binary
+

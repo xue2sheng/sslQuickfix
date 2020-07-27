@@ -82,16 +82,16 @@ void Application::onMessage(const FIX44::OrderCancelReject&, const FIX::SessionI
 void Application::onMessage(const FIX50::ExecutionReport&, const FIX::SessionID&) { }
 void Application::onMessage(const FIX50::OrderCancelReject&, const FIX::SessionID&) { }
 
-void Application::run(const bool launchDefaultOrder)
+void Application::run(const bool launchDefaultOrder, const std::string& senderCompID, const std::string& targetCompID)
 {
     if (launchDefaultOrder) {
         try {
             std::cout << std::endl
                       << "Sending default NewOrderSingle for FIX 4.2" << std::endl;
-            FIX::Message order = launchDefaultNewOrderSingle42();
+            FIX::Message order = launchDefaultNewOrderSingle42(senderCompID, targetCompID);
             FIX::Session::sendToTarget(order);
         } catch (std::exception& e) {
-            std::cout << "Message Not Sent: " << e.what();
+            std::cout << "Message Not Sent: " << e.what() << std::endl;
         }
     } else {
         while (true) {
@@ -835,7 +835,7 @@ FIX::TimeInForce Application::queryTimeInForce()
     }
 }
 
-FIX42::NewOrderSingle Application::launchDefaultNewOrderSingle42()
+FIX42::NewOrderSingle Application::launchDefaultNewOrderSingle42(const std::string& senderCompID, const std::string& targetCompID)
 {
     FIX42::NewOrderSingle newOrderSingle(
         FIX::ClOrdID("12345"),
@@ -849,8 +849,8 @@ FIX42::NewOrderSingle Application::launchDefaultNewOrderSingle42()
     newOrderSingle.set(FIX::TimeInForce(FIX::TimeInForce_IMMEDIATE_OR_CANCEL));
     newOrderSingle.set(FIX::Price(1.3));
 
-    newOrderSingle.getHeader().setField(FIX::SenderCompID("INIT"));
-    newOrderSingle.getHeader().setField(FIX::TargetCompID("ACCEPT"));
+    newOrderSingle.getHeader().setField(FIX::SenderCompID(senderCompID));
+    newOrderSingle.getHeader().setField(FIX::TargetCompID(targetCompID));
 
     return newOrderSingle;
 }

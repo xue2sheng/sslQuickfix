@@ -71,7 +71,7 @@
 class Application : public FIX::Application,
                     public FIX::MessageCracker {
 public:
-    void run(const bool launchDefaultOrder = false);
+    void run(const bool launchDefaultOrder = false, const std::string& senderCompID = "INIT", const std::string& targetCompID = "ACCEPT");
 
 private:
     void onCreate(const FIX::SessionID&) { }
@@ -144,7 +144,7 @@ private:
     FIX::TimeInForce queryTimeInForce();
 
     void log(std::ostream& out, const FIX::Message& message);
-    FIX42::NewOrderSingle launchDefaultNewOrderSingle42();
+    FIX42::NewOrderSingle launchDefaultNewOrderSingle42(const std::string& senderCompID, const std::string& targetCompID);
 };
 
 #endif

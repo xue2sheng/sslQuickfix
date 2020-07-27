@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <settings>
-    <default SocketConnectHost="localhost" HeartBtInt="60" StartTime="00:00:00" EndTime="00:00:00" ResetOnLogon="Y" FileStorePath="logs" FileLogPath="logs" DataDictionary="resources/FIX42.xml" />
+    <default SocketConnectHost="localhost" HeartBtInt="60" StartTime="00:00:00" EndTime="00:00:00" FileStorePath="logs" FileLogPath="logs" DataDictionary="resources/FIX42.xml" ResetOnLogon="Y" />
     <fixsessions>
-        <fixsession TLS="true" ConnectionType="initiator" SocketConnectPort="9880" SenderCompID="INIT" TargetCompID="ACCEPT" BeginString="FIX.4.2" ClientCertificateKeyFile="tls/cakey.pem" ClientCertificateFile="tls/cacert.pem" />
-    </fixsessions>
-</settings>
+        <fixsession TLS="false" ConnectionType="initiator" SocketConnectPort="9880" SenderCompID="acceptor_target" TargetCompID="acceptor_sender" BeginString="FIX.4.2" />
+            <!--
+                <fixsession TLS="true" ConnectionType="initiator" SocketConnectPort="9880" SenderCompID="acceptor_target" TargetCompID="acceptor_sender" BeginString="FIX.4.2" ClientCertificateKeyFile="tls/cakey.pem" ClientCertificateFile="tls/cacert.pem" />
+            -->
+            </fixsessions>
+        </settings>

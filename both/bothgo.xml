@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <settings>
-    <default HeartBtInt="60" ResetOnLogon="Y" FileLogPath="logs" FileStorePath="logs" StartTime="00:00:00" EndTime="00:00:00" />
+    <!-- <default HeartBtInt="60" ResetOnLogon="Y" FileLogPath="logs" FileStorePath="logs" StartTime="00:00:00" EndTime="00:00:00" /> -->
+    <default HeartBtInt="60" FileLogPath="logs" FileStorePath="logs" StartTime="00:00:00" EndTime="00:00:00" />
     <fixsessions>
-        <fixsession TLS="true" ConnectionType="acceptor" SocketAcceptPort="9880" SenderCompID="acceptor_sender" TargetCompID="acceptor_target" BeginString="FIX.4.2" SocketInitiatorPort="9880" SocketPrivateKeyFile="tls/cakey.pem" SocketCertificateFile="tls/cacert.pem" />
-        <fixsession TLS="true" ConnectionType="initiator" SocketConnectHost="localhost" SocketConnectPort="9881" SenderCompID="initiator_sender" TargetCompID="initiator_target" BeginString="FIX.4.2" SocketInitiatorPort="9881" SocketPrivateKeyFile="tls/cakey.pem" SocketCertificateFile="tls/cacert.pem" />
-    </fixsessions>
-</settings>
+        <fixsession TLS="false" ConnectionType="acceptor" SocketAcceptPort="9880" SenderCompID="acceptor_sender" TargetCompID="acceptor_target" BeginString="FIX.4.2" />
+            <!--
+                <fixsession TLS="true" ConnectionType="acceptor" SocketAcceptPort="9880" SenderCompID="acceptor_sender" TargetCompID="acceptor_target" BeginString="FIX.4.2" SocketInitiatorPort="9880" SocketPrivateKeyFile="tls/cakey.pem" SocketCertificateFile="tls/cacert.pem" />
+                <fixsession TLS="true" ConnectionType="initiator" SocketConnectHost="localhost" SocketConnectPort="9881" SenderCompID="initiator_sender" TargetCompID="initiator_target" BeginString="FIX.4.2" SocketInitiatorPort="9881" SocketPrivateKeyFile="tls/cakey.pem" SocketCertificateFile="tls/cacert.pem" />
+            -->
+            </fixsessions>
+        </settings>
 

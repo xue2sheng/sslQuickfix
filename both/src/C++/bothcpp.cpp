@@ -81,8 +81,11 @@ int main(int argc, char** argv)
         logSettings(xmlSettings.SSLAcceptor, "SSL Acceptor");
 
         Application application;
-        FIX::FileStoreFactory storeFactory(xmlSettings.SSLInitiator);
-        FIX::ScreenLogFactory logFactory(xmlSettings.SSLInitiator);
+        //        FIX::FileStoreFactory storeFactory(xmlSettings.SSLInitiator);
+        FIX::FileStoreFactory storeFactory(xmlSettings.Initiator);
+        //       FIX::ScreenLogFactory logFactory(xmlSettings.SSLInitiator);
+        FIX::ScreenLogFactory logFactory(xmlSettings.Initiator);
+        /*
 #ifdef HAVE_SSL
         if (isSSL.compare("SSL") == 0) {
             std::cout << std::endl
@@ -96,16 +99,24 @@ int main(int argc, char** argv)
             initiator = new FIX::SSLSocketInitiator(application, storeFactory, xmlSettings.SSLInitiator, logFactory);
         } else
 #endif
+*/
         {
             std::cout << std::endl
                       << "No SSL" << std::endl
                       << std::endl;
-            initiator = new FIX::SocketInitiator(application, storeFactory, xmlSettings.SSLInitiator, logFactory);
+            //initiator = new FIX::SocketInitiator(application, storeFactory, xmlSettings.SSLInitiator, logFactory);
+            initiator = new FIX::SocketInitiator(application, storeFactory, xmlSettings.Initiator, logFactory);
         }
 
         initiator->start();
-        FIX::process_sleep(5);
-        application.run(launchDefaultOrder);
+
+        FIX::process_sleep(3);
+        if (xmlSettings.Initiator.size() > 0) {
+            std::set<FIX::SessionID>::iterator firstOne = xmlSettings.Initiator.getSessions().begin();
+            application.run(launchDefaultOrder, firstOne->getSenderCompID(), firstOne->getTargetCompID());
+        }
+        FIX::process_sleep(3);
+
         initiator->stop();
         delete initiator;
 
